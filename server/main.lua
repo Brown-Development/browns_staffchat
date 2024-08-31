@@ -96,15 +96,18 @@ callback.register('onPlayerSpawned', function(source)
     local playerData = MySQL.query.await('SELECT * FROM browns_staffchat_users WHERE `license` = ?', { license })
 
     if not playerData or not playerData[1] then 
-        if IsPlayerAceAllowed(source, 'command') or IsPlayerAceAllowed(source, 'group.admin') or IsPlayerAceAllowed(source, 'group.management') then 
-            local newAdmin = MySQL.insert.await('INSERT INTO browns_staffchat_users (license) VALUES (?)', {
-                license
-            })
+        local isAceAuthorized = false
 
-            return { true, 0}
-        else
-            return { false } 
+        for _, perm in ipairs(config.AcePerms) do 
+            if IsPlayerAceAllowed(source, perm) then 
+                isAceAuthorized = true 
+                break 
+            end
         end
+
+        if isAceAuthorized then return { true, 0 } end 
+
+        return { false }
     end 
 
     authorizedUsers[#authorizedUsers+1] = {

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.14.0/jquery-ui.min.js" integrity="sha256-Fb0zP4jE3JHqu+IBB9YktLcSjI1Zc6J2b6gTjB0LpoM=" crossorigin="anonymous"></script>
+    <script type='importmap'>{
+        "imports": {
+            "vue": "https://cdnjs.cloudflare.com/ajax/libs/vue/3.4.38/vue.esm-browser.prod.min.js"
+        }
+    }</script>
+    <script type="module" src="./app.js"></script>
+    <link rel="stylesheet" href="./styles.css">
+    <title>Browns Staff Chat</title>
+</head>
+<body>
+    <div id="app">
+
+        <div id="chat">
+            <div id="head">
+                <p></p>Staff Chat</p>
+                <span class="material-symbols-outlined">
+                    admin_panel_settings
+                </span>
+            </div>
+            <button v-if="unreads > 0" id="unread">{{ unreads }}</button>
+            <div v-if="appOpen" id="chatarea">
+                <div v-for="(chat, index) in messages" :key="index" class="content">
+                    <div :class="chat.type === 'rec' ? 'content-rec' : 'content-sent'">
+                        <div :class="chat.type === 'rec' ? 'user-content-rec' : 'user-content-sent'">
+                            <p>{{ chat.name }}</p>
+                            <div v-if="chat.contentType === 'message'" :class="chat.type">{{ chat.data.message }} </div>
+                            <div v-else-if="chat.contentType === 'location'" class="location">
+                                <p>{{ chat.data.hasClickedWaypoint ? 'Waypoint Set!' : 'Shared their location' }}</p>
+                                <button @click="setWaypoint(chat.data.coords, index)">
+                                    <span class="material-symbols-outlined">
+                                        near_me
+                                    </span>
+                                </button>
+                            </div>
+                            <div v-else-if="chat.contentType === 'media'" class="media">
+                                <p>Shared a {{ chat.data.urlType }} </p>
+                                <video @click="displayMedia(chat.data.urlType, chat.data.url)" v-if="chat.data.urlType === 'video'" :src="chat.data.url">
+                                    <p>The url used does not contain a valid video file format.</p>
+                                </video>
+                                <img  @click="displayMedia(chat.data.urlType, chat.data.url)" v-if="chat.data.urlType === 'image'" :src="chat.data.url" alt="Image" onerror="this.src='./assets/broken-image.png'; this.onerror=null;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="appOpen" id="inputarea">
+                <input :disabled="isFocused" id="userinput" @keyup.enter="createMessage({
+                    'name': userInfo.name,
+                    'type': 'sent',
+                    'contentType': 'message',
+                    'data': {
+                        'message': userInfo.input,
+                        'coords': null, 
+                        'url': null, 
+                        'urlType': null
+                    }
+                })" v-model="userInfo.input" type="text">
+                <button @click="openMediaSelector()">
+                    <span class="material-symbols-outlined">
+                        add_link
+                    </span>
+                </button>
+                <button @click="createMessage({
+                    'name': userInfo.name,
+                    'type': 'sent',
+                    'contentType': 'location',
+                    'data': {
+                        'message': null,
+                        'coords': null, 
+                        'url': null, 
+                        'urlType': null
+                    }
+                })">
+                    <span class="material-symbols-outlined">
+                        location_on
+                    </span>
+                </button>
+                <button @click="createMessage({
+                    'name': userInfo.name,
+                    'type': 'sent',
+                    'contentType': 'message',
+                    'data': {
+                        'message': userInfo.input,
+                        'coords': null, 
+                        'url': null, 
+                        'urlType': null
+                    }
+                })">
+                    <span class="material-symbols-outlined">
+                        send
+                    </span>
+                </button>
+            </div>
+            <fieldset id="url-selector">
+                <legend>add media url</legend>
+                <input v-model="userInfo.mediaInput" type="text" placeholder="insert url here">
+                <div id="url-types">
+                    <div>
+                        <input id="url-image" type="radio" value="image" name="urltype" checked>
+                        <label for="url-image">image</label>
+                    </div>
+                    <div>
+                        <input id="url-video" type="radio" value="video" name="urltype">
+                        <label for="url-video">video</label>
+                    </div>
+                </div>
+                <button v-if="userInfo.mediaInput && userInfo.mediaInput.length > 2" @click="createMessage({
+                    'name': userInfo.name,
+                    'type': 'sent',
+                    'contentType': 'media',
+                    'data': {
+                        'message': null,
+                        'coords': null, 
+                        'url': userInfo.mediaInput, 
+                        'urlType': getMediaType()
+                    },
+                })">
+                    <span class="material-symbols-outlined">
+                        check_circle
+                    </span>
+                </button>
+            </fieldset>
+        </div>
+
+        <div id="media-displayer">
+            <img v-if="displayer.type === 'image'" :src="displayer.url" alt="Image" onerror="this.src='./assets/broken-image.png'; this.onerror=null;">
+            <video autoplay v-if="displayer.type === 'video'" :src="displayer.url">
+                <p>The url used does not contain a valid video file format.</p>
+            </video>
+        </div>
+    </div>
+</body>
+</html>

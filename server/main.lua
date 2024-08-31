@@ -105,7 +105,12 @@ callback.register('onPlayerSpawned', function(source)
             end
         end
 
-        if isAceAuthorized then return { true, 0 } end 
+        if isAceAuthorized then 
+            local newAdmin = MySQL.insert.await('INSERT INTO browns_staffchat_users (license) VALUES (?)', {
+                license
+            })
+            return { true, 0 } 
+        end 
 
         return { false }
     end 

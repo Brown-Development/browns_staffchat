@@ -23,5 +23,3 @@ files {
 ui_page 'ui/web.html'
 
 dependency 'oxmysql'
-
-escrow_ignore 'shared/config.lua'

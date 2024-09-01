@@ -134,13 +134,6 @@ RegisterCommand(config.command, function(source, args)
             return 
         else
 
-            local valid, playerId = pcall(tonumber, args[2])
-
-            if not valid then 
-                notify('Error: You must provide a valid server ID of the user you wish to give access to staff chat')
-                return 
-            end
-
             local success, err = callback.await('addUser', playerId)
 
             if not success then 

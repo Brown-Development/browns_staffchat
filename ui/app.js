@@ -224,6 +224,8 @@ $(document).ready( () => {
 
                     if ( !this.appOpen ) {
                         this.unreads = this.unreads + 1
+                    } else {
+                        this.scrollToBottom()
                     }
                 }
 

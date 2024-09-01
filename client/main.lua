@@ -122,20 +122,6 @@ callback.register('onDeAuthorized', function()
     return { true }
 end)
 
-AddEventHandler('onResourceStart', function(r)
-    if r == GetCurrentResourceName() then 
-        isAuthorized, Unreads = callback.await('onPlayerSpawned')
-
-        if not isAuthorized then return end  
-    
-        SendNUIMessage({
-            type = 'playerLoaded',
-            unreads = Unreads
-        })
-    end
-end)
-
-
 RegisterCommand(config.command, function(source, args)
     if not args[1] then 
         openChat()

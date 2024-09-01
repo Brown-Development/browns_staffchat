@@ -139,8 +139,6 @@ callback.register('onChatOpen', function(source)
 
     local chatData = {}
 
-    local placement = 0
-
     for i = 1, #messages do 
         local message = messages[i]
         local messageType = message.license == license and 'sent' or 'rec'
@@ -361,11 +359,6 @@ callback.register('removeUser', function(source, playerId)
 end)
 
 local function createMessage(message) 
-    local resource, resourceName = pcall(GetInvokingResource) 
-
-    if not resource then 
-        resourceName = 'Unknown'
-    end
 
     if not message or type(message) ~= 'table' then 
         error(('createMessage: ( param1 => message ) must be a table, received: %s'):format(type(message)))

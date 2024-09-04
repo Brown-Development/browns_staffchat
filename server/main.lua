@@ -29,7 +29,9 @@ local callback = {
 }
 
 local authorizedUsers = {}
+local playersJoined = {}
 local yield = false
+
 
 callback.register = function(name, cb)
     callback.registered[name] = cb 
